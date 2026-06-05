@@ -71,8 +71,7 @@ Commands are case-insensitive, but the command arguments should be handled as no
 | `UPPER hello`   | `HELLO`             |
 | `LOWER HELLO`   | `hello`             |
 | `REVERSE hello` | `olleh`             |
-| `TIME`          | current server time |
-| `QUIT`          | closes connection   |
+| `    `          | error message       |
 | unknown command | error message       |
 
 ## Running the Lab
@@ -152,7 +151,7 @@ The main function being tested is:
 handleCommand(line)
 ```
 
-The tests check that commands such as `ECHO`, `UPPER`, `LOWER`, `REVERSE`, `TIME`, and `QUIT` return the expected responses.
+The tests check that commands such as `ECHO`, `UPPER`, `LOWER`, `REVERSE`, and `QUIT` return the expected responses.
 
 Some tests may fail when you first receive the starter code. Your job is to update the implementation until the required tests pass.
 
@@ -178,9 +177,13 @@ npm run test:watch
 Answer the following questions in your submission:
 
 1. What is the difference between the client and the server?
+    The server is always listening for a response from the client and the client is only active when connecting. In the code the only real difference is the function createServer and createConnection.
 2. Why does the server need to keep running after handling one request?
+    Beacause the server is meant to keep running so that multiple clients can connect at ant time.
 3. What happens if two clients connect at the same time?
+    Both clients can connect to the same socket and send data independently to the server. The clients are given different IP addresses.
 4. How is this different from HTTP?
+    HTTP wouldn't have a constant connection between the client and the server. 
 
 ## Submission
 

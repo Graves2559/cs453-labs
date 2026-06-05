@@ -1,4 +1,8 @@
 export function handleCommand(line) {
+    if (line == null) {
+        return "ERROR empty command";
+    }
+
     const trimmed = line.trim();
 
     if (trimmed.length === 0) {
@@ -11,22 +15,19 @@ export function handleCommand(line) {
     switch (command.toUpperCase()) {
         case "ECHO":
             return argument;
+        
+        case "UPPER":
+            return argument.toUpperCase();
 
-        // TODO: implement UPPER
-        // Example:
-        // UPPER hello -> HELLO
-
-        // TODO: implement LOWER
-        // Example:
-        // LOWER HELLO -> hello
-
-        // TODO: implement REVERSE
-        // Example:
-        // REVERSE hello -> olleh
-
-        // TODO: implement TIME
-        // Example:
-        // TIME -> current server time
+        case "LOWER":
+            return argument.toLowerCase();
+        
+        case "REVERSE":
+            let reversed = "";
+            for (let i = argument.length - 1; i >= 0; i--) {
+                reversed += argument[i];
+            }
+            return reversed;
 
         case "QUIT":
             return "Goodbye.";

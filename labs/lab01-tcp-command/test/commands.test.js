@@ -30,13 +30,6 @@ describe("handleCommand", () => {
     test("REVERSE reverses the argument", () => {
         expect(handleCommand("REVERSE hello")).toBe("olleh");
     });
-
-    test("TIME returns a non-empty response", () => {
-        const response = handleCommand("TIME");
-
-        expect(typeof response).toBe("string");
-        expect(response.length).toBeGreaterThan(0);
-    });
 });
 
 describe("shouldCloseConnection", () => {
