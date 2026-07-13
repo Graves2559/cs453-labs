@@ -35,10 +35,6 @@ export function createApp() {
   // TODO: Create a new item.
   app.post("/items", (req, res) => {
     const { name, quantity } = req.body;
-    if (typeof name !== "string" || typeof quantity !== "number") {
-      res.status(400).json({ error: "Invalid item data" });
-      return;
-    }
 
     const item = { id: nextId++, name, quantity };
     items.push(item);
