@@ -19,27 +19,57 @@ export function createApp() {
 
   // TODO: Return all items.
   app.get("/items", (req, res) => {
-    res.status(501).json({ error: "Not implemented yet" });
+    res.json(items);
   });
 
   // TODO: Return one item by ID.
   app.get("/items/:id", (req, res) => {
-    res.status(501).json({ error: "Not implemented yet" });
+    const item = items.find(i => i.id === parseInt(req.params.id));
+    if (!item) {
+      res.status(404).json({ error: "Item not found" });
+      return;
+    }
+    res.json(item);
   });
 
   // TODO: Create a new item.
   app.post("/items", (req, res) => {
-    res.status(501).json({ error: "Not implemented yet" });
+    const { name, quantity } = req.body;
+
+    const item = { id: nextId++, name, quantity };
+    items.push(item);
+    res.status(201).json(item);
   });
 
   // TODO: Update an existing item.
   app.put("/items/:id", (req, res) => {
-    res.status(501).json({ error: "Not implemented yet" });
+    //verify the item exists
+    const item = items.find(i => i.id === parseInt(req.params.id));
+    if (!item) {
+      res.status(404).json({ error: "Item not found" });
+      return;
+    }
+
+    const { name, quantity } = req.body;
+    if (typeof name !== "string" || typeof quantity !== "number") {
+      res.status(400).json({ error: "Invalid item data" });
+      return;
+    }
+
+    item.name = name;
+    item.quantity = quantity;
+    res.json(item);
   });
 
   // TODO: Delete an existing item.
   app.delete("/items/:id", (req, res) => {
-    res.status(501).json({ error: "Not implemented yet" });
+    const itemIndex = items.findIndex(i => i.id === parseInt(req.params.id));
+    if (itemIndex === -1) {
+      res.status(404).json({ error: "Item not found" });
+      return;
+    }
+    items.splice(itemIndex, 1);
+    res.status(204).send();
   });
 
   app.use((req, res) => {

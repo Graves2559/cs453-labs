@@ -269,23 +269,16 @@ npm run test:watch
 Answer the following questions in your submission:
 
 1. What is the difference between a TCP message and an HTTP request?
+  Raw TCP sends data over a connection. HTTP is a higher-level protocol built on top of TCP that uses a standard text-based request/response format.
 2. What does the `Content-Type: application/json` header tell the server?
+  It tells the server that the request body is JSON and to parse the body as JSON.
 3. Why should a server return different HTTP status codes for different situations?
+  It allows clients to recognize sucess and errors for their requests without needing to parse the response past the error code. It also makes it standardized.
 4. What happens if the client sends invalid JSON?
+  The server will send a code 400 error back to the client.
 5. How is this lab different from Lab 1?
+  This lab focuses on HTTP methods and JSON bodies instead of raw TCP.
 
-## Graduate Students
-
-Graduate students should complete one additional feature.
-
-Choose one of the following:
-
-1. Add a new route, such as `GET /time` or `POST /uppercase`.
-2. Add one additional calculation operation and document it.
-3. Improve the request counter so it tracks counts by route.
-4. Add additional automated tests for error handling.
-
-Document your graduate extension in your submission.
 
 ## Submission
 
