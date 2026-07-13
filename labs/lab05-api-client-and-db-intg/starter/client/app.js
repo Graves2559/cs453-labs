@@ -5,10 +5,34 @@ const itemList = document.querySelector("#items");
 const form = document.querySelector("#add-item-form");
 const itemNameInput = document.querySelector("#item-name");
 const itemQuantityInput = document.querySelector("#item-quantity");
+const editForm = document.querySelector("#edit-item-form");
+const editItemStatus = document.querySelector("#edit-item-status");
+const editItemNameInput = document.querySelector("#edit-item-name");
+const editItemQuantityInput = document.querySelector("#edit-item-quantity");
+const editItemClearButton = document.querySelector("#edit-item-clear");
 const statusBox = document.querySelector("#status");
+
+let editingItemId = null;
 
 function setStatus(message) {
   statusBox.textContent = message;
+}
+
+function setEditState(message) {
+  editItemStatus.textContent = message;
+}
+
+function clearEditForm() {
+  editingItemId = null;
+  editForm.reset();
+  setEditState("Select an item to edit.");
+}
+
+function beginEdit(item) {
+  editingItemId = item.id;
+  editItemNameInput.value = item.name;
+  editItemQuantityInput.value = String(item.quantity);
+  setEditState(`Editing item ${item.id}. Change name and/or quantity, then submit.`);
 }
 
 function renderItems(items) {
@@ -16,7 +40,29 @@ function renderItems(items) {
 
   for (const item of items) {
     const li = document.createElement("li");
-    li.textContent = `${item.id}: ${item.name} (${item.quantity})`;
+
+    const label = document.createElement("span");
+    label.textContent = `${item.id}: ${item.name} (${item.quantity})`;
+
+    const actions = document.createElement("span");
+    actions.className = "item-actions";
+
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.textContent = "Edit";
+    editButton.addEventListener("click", () => {
+      beginEdit(item);
+    });
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.textContent = "Delete";
+    deleteButton.addEventListener("click", async () => {
+      await deleteItem(item.id);
+    });
+
+    actions.append(editButton, deleteButton);
+    li.append(label, actions);
     itemList.appendChild(li);
   }
 }
@@ -64,7 +110,70 @@ async function addItem(name, quantity) {
   }
 }
 
+async function replaceItem(id, name, quantity) {
+  setStatus(`Updating item ${id}...`);
+
+  try { 
+    const response = await fetch(`${API_BASE_URL}/api/items/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ name, quantity })
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message ?? `PATCH /api/items/${id} failed with status ${response.status}`);
+    }
+    setStatus(`Updated item ${id}: ${data.item.name}`);
+    await loadItems();
+  } catch (error) {
+    setStatus(error.message);
+  }
+}
+
+async function deleteItem(id) {
+  setStatus(`Deleting item ${id}...`);
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/items/${id}`, {
+      method: "DELETE"
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message ?? `DELETE /api/items/${id} failed with status ${response.status}`);
+    }
+    setStatus(`Deleted item ${id}: ${data.item.name}`);
+    await loadItems();
+  } catch (error) {
+    setStatus(error.message);
+  }
+}
+
 loadButton.addEventListener("click", loadItems);
+
+editItemClearButton.addEventListener("click", clearEditForm);
+
+editForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  if (editingItemId === null) {
+    setStatus("Select an item to edit first.");
+    return;
+  }
+
+  const name = editItemNameInput.value.trim();
+  const quantity = Number(editItemQuantityInput.value);
+
+  if (!name || !Number.isInteger(quantity) || quantity < 0) {
+    setStatus("Enter a name and a non-negative integer quantity.");
+    return;
+  }
+
+  await replaceItem(editingItemId, name, quantity);
+  clearEditForm();
+});
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();

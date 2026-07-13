@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import pg from "pg";
+import { fileURLToPath } from "url";
 
 const { Pool } = pg;
 
@@ -91,27 +92,204 @@ export function createApp() {
   });
 
   // TODO: Return one item by ID.
-  app.get("/api/items/:id", (req, res) => {
-    res.status(501).json({ error: "Not implemented yet" });
+  app.get("/api/items/:id", async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({
+          error: "Bad Request",
+          message: "Invalid item ID."
+        });
+      }
+      const result = await pool.query(`
+        SELECT id, name, quantity
+        FROM items
+        WHERE id = $1
+      `, [id]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          error: "Not Found",
+          message: "Item not found."
+        });
+      }
+
+      res.json({ item: result.rows[0] });
+    } catch (error) {
+      console.error("Failed to load item:", error);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Failed to load item."
+      });
+    }
   });
 
   // TODO: Replace one item by ID.
-  app.put("/api/items/:id", (req, res) => {
-    res.status(501).json({ error: "Not implemented yet" });
+  app.put("/api/items/:id", async (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid item ID."
+      });
+    }
+
+    const name = req.body?.name?.trim();
+    const quantity = Number(req.body?.quantity);
+
+    if (!name || !Number.isInteger(quantity) || quantity < 0) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "A name and non-negative integer quantity are required."
+      });
+    }
+
+    try {
+      const result = await pool.query(
+        `
+          UPDATE items
+          SET name = $1, quantity = $2
+          WHERE id = $3
+          RETURNING id, name, quantity
+        `,
+        [name, quantity, id]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          error: "Not Found",
+          message: "Item not found."
+        });
+      }
+
+      res.json({ item: result.rows[0] });
+    } catch (error) {
+      console.error("Failed to update item:", error);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Failed to update item."
+      });
+    }
   });
 
   // TODO: Partially update one item by ID.
-  app.patch("/api/items/:id", (req, res) => {
-    res.status(501).json({ error: "Not implemented yet" });
+  app.patch("/api/items/:id", async (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid item ID."
+      });
+    }
+
+    const body = req.body ?? {};
+    const hasName = Object.prototype.hasOwnProperty.call(body, "name");
+    const hasQuantity = Object.prototype.hasOwnProperty.call(body, "quantity");
+
+    if (!hasName && !hasQuantity) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "At least one field must be provided."
+      });
+    }
+
+    let name;
+    let quantity;
+
+    if (hasName) {
+      if (typeof body.name !== "string" || body.name.trim().length === 0) {
+        return res.status(400).json({
+          error: "Bad Request",
+          message: "Name must be a non-empty string."
+        });
+      }
+
+      name = body.name.trim();
+    }
+
+    if (hasQuantity) {
+      quantity = Number(body.quantity);
+
+      if (!Number.isInteger(quantity) || quantity < 0) {
+        return res.status(400).json({
+          error: "Bad Request",
+          message: "Quantity must be a non-negative integer."
+        });
+      }
+    }
+
+    try {
+      const result = await pool.query(
+        `
+          UPDATE items
+          SET
+            name = COALESCE($1, name),
+            quantity = COALESCE($2, quantity)
+          WHERE id = $3
+          RETURNING id, name, quantity
+        `,
+        [name ?? null, quantity ?? null, id]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          error: "Not Found",
+          message: "Item not found."
+        });
+      }
+
+      res.json({ item: result.rows[0] });
+    } catch (error) {
+      console.error("Failed to update item:", error);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Failed to update item."
+      });
+    }
   });
 
   // TODO: Delete one item by ID.
-  app.delete("/api/items/:id", (req, res) => {
-    res.status(501).json({ error: "Not implemented yet" });
+  app.delete("/api/items/:id", async (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid item ID."
+      });
+    }
+
+    try {
+      const result = await pool.query(
+        `
+          DELETE FROM items
+          WHERE id = $1
+          RETURNING id, name, quantity
+        `,
+        [id]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          error: "Not Found",
+          message: "Item not found."
+        });
+      }
+
+      res.json({ item: result.rows[0] });
+    } catch (error) {
+      console.error("Failed to delete item:", error);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Failed to delete item."
+      });
+    }
   });
 
   app.use((req, res) => {
-    res.status(404).json({ error: "Not found" });
+    res.status(404).json({
+      error: "Not Found",
+      message: "The requested resource was not found."
+    });
   });
 
   return app;
@@ -139,7 +317,7 @@ export async function initializeDatabase() {
   }
 }
 
-const isMainModule = process.argv[1] === new URL(import.meta.url).pathname;
+const isMainModule = process.argv[1] === fileURLToPath(import.meta.url);
 
 if (isMainModule) {
   const app = createApp();

@@ -35,6 +35,13 @@ form {
   margin-bottom: 16px;
 }
 
+#edit-item-form {
+  padding: 16px;
+  border: 1px solid #d0d7de;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
 label {
   display: grid;
   gap: 6px;
@@ -62,10 +69,38 @@ button {
   cursor: pointer;
 }
 
+button.secondary {
+  background: #e2e8f0;
+  color: #1b1f24;
+}
+
+.edit-state {
+  margin: 0;
+  color: #475569;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .status {
   min-height: 1.5em;
 }
 
 .items {
   padding-left: 20px;
+}
+
+.items li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.item-actions {
+  display: flex;
+  gap: 8px;
 }

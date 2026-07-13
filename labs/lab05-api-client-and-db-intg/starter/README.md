@@ -47,20 +47,20 @@ and connect it to the database.
 
 ### 1. What changed when the API moved from in-memory data to Postgres?
 
-TODO
+First off the syntax is different as you have to use SQL queries. More importantly the difference is that a server is storing the data in this lab so it persists accross instances of the server. 
 
 ### 2. When should you use `PUT` instead of `PATCH`?
 
-TODO
+Put should be used when the whole item needs to be replaced.
 
 ### 3. What kinds of validation belong in the API even if the browser client also validates input?
 
-TODO
+It is required in case of the user inputting valid but not correct data like an integer >0 and in case a user attempts a malicious attack via cleint messages. I remeber hearing about client injections where the cleint can send a message to the server and if the server doesnt have good enough protection it will execute it.
 
 ### 4. How does the browser client help you test the API differently than `curl` alone?
 
-TODO
+It allows you to see what a user would see and not just the server response. It also allows for a faster troubleshooting of items.
 
 ### 5. If you added an extension, what did you add and why?
 
-TODO
+I did not, because I procrastinate and am doing this at the last minute.

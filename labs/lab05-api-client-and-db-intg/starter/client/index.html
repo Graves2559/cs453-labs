@@ -33,6 +33,25 @@
           <button type="submit">Add Item</button>
         </form>
 
+        <form id="edit-item-form">
+          <p id="edit-item-status" class="edit-state">Select an item to edit.</p>
+
+          <label>
+            Name
+            <input id="edit-item-name" name="name" type="text">
+          </label>
+
+          <label>
+            Quantity
+            <input id="edit-item-quantity" name="quantity" type="number" min="0">
+          </label>
+
+          <div class="edit-actions">
+            <button id="edit-item-submit" type="submit">Edit Item</button>
+            <button id="edit-item-clear" type="button" class="secondary">Clear</button>
+          </div>
+        </form>
+
         <p id="status" class="status">Ready.</p>
 
         <ul id="items" class="items"></ul>
